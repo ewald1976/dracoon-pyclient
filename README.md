@@ -22,7 +22,7 @@ pip3 install -r requirements.txt
 2. Konfiguration:
    - Grant Type: `password`
    - Redirect URI: `http://localhost`
-   - Scopes: `user:read`, `group:read`, `group:write`
+   - Berechtigungen: User-Manager, Group Manager
 3. Client-ID und Client-Secret notieren
 
 ### .env Datei anlegen
