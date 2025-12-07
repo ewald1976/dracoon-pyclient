@@ -1,0 +1,3 @@
+dracoon>=1.13.0
+rich
+python-dotenv
