@@ -5,7 +5,7 @@ Python-Tool für die Dracoon API mit Console-Interface.
 ## Module
 
 - **User zu Gruppe hinzufügen** - Massenoperation zum Hinzufügen von Usern zu Gruppen
-- **Room Admin Report** - Zeigt an, in welchen Räumen ein User Room-Admin ist (wichtig vor User-Löschung)
+- **Room Admin Report** - Zeigt an wo ein User letzter Raum Admin ist. Raum kann dann direkt gelöscht werden.
 
 ## Installation
 
@@ -66,4 +66,4 @@ MIT License - siehe [LICENSE](LICENSE)
 
 ## Autor
 
-Elmar Leirich ([@ewald1976](https://github.com/ewald1976))
+[@ewald1976](https://github.com/ewald1976)
