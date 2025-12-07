@@ -56,7 +56,7 @@ python3 dracoon-pyclient.py
 
 **ModuleNotFoundError** - `pip3 install -r requirements.txt` ausführen
 
-## Disclaimer
+## Disclaimer 
 
 Dieses Tool wurde privat entwickelt und hat **keinen offiziellen Bezug zur Firma Dracoon**. Die Nutzung erfolgt auf eigene Verantwortung. Der Entwickler übernimmt keine Haftung für eventuelle Schäden, die durch die Verwendung dieses Tools entstehen.
 
