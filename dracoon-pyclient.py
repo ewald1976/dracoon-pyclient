@@ -7,7 +7,7 @@ Nutzt offizielles dracoon SDK!
 https://github.com/unbekanntes-pferd/dracoon-python-api
 """
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 import sys
 import asyncio
@@ -32,43 +32,43 @@ class DracoonPyclient:
         self.dracoon = None
         self.god_mode = False
         
-        # Verfügbare Module
+        # Available modules
         self.modules = [
             {
                 'id': 1,
-                'name': 'User zu Gruppe hinzufügen',
-                'description': 'Fügt Benutzer zu Gruppen hinzu - einzeln, gefiltert oder als Massenoperation',
+                'name': 'Add Users to Group',
+                'description': 'Add users to groups - individually, filtered or as bulk operation',
                 'module': user_to_group
             },
             {
                 'id': 2,
                 'name': 'Room Admin Report',
-                'description': 'Zeigt (löscht) Räume eines Benutzers in denen er letzter Admin ist',
+                'description': 'Shows (deletes) rooms where a user is the last admin',
                 'module': room_admin_report
             },
             {
                 'id': 3,
-                'name': 'Gruppenmitglieder auflisten',
-                'description': 'Listet alle Mitglieder einer Gruppe auf und exportiert optional als CSV',
+                'name': 'List Group Members',
+                'description': 'Lists all members of a group and optionally exports as CSV',
                 'module': group_members_report
             }
         ]
     
     async def connect(self):
-        """Stellt Verbindung zur Dracoon API her"""
+        """Establishes connection to Dracoon API"""
         self.console.clear()
         show_header(self.console, f"Dracoon Pyclient v{__version__}")
         
         if self.god_mode:
-            self.console.print(f"[{COLOR_ERROR}]⚠️  GOD-MODE AKTIV ⚠️[/{COLOR_ERROR}]\n")
+            self.console.print(f"[{COLOR_ERROR}]⚠️  GOD-MODE ACTIVE ⚠️[/{COLOR_ERROR}]\n")
         
-        self.console.print(f"[bold {COLOR_PRIMARY}]Verbindung zu Dracoon herstellen[/bold {COLOR_PRIMARY}]\n")
+        self.console.print(f"[bold {COLOR_PRIMARY}]Connect to Dracoon[/bold {COLOR_PRIMARY}]\n")
         self.console.print(f"[{COLOR_DIM}]OAuth Password Grant Flow[/{COLOR_DIM}]\n")
         
         # Credentials laden
         base_url, client_id, client_secret, username, password = get_credentials()
         
-        self.console.print(f"\n[{COLOR_WARNING}]Verbinde mit Dracoon...[/{COLOR_WARNING}]")
+        self.console.print(f"\n[{COLOR_WARNING}]Connecting to Dracoon...[/{COLOR_WARNING}]")
         
         try:
             self.dracoon = DRACOON(base_url=base_url, client_id=client_id, client_secret=client_secret)
@@ -82,29 +82,29 @@ class DracoonPyclient:
             first_name = getattr(user_info, 'firstName', '')
             last_name = getattr(user_info, 'lastName', '')
             
-            self.console.print(f"[{COLOR_SUCCESS}]✓ Verbunden als: {first_name} {last_name}[/{COLOR_SUCCESS}]\n")
+            self.console.print(f"[{COLOR_SUCCESS}]✓ Connected as: {first_name} {last_name}[/{COLOR_SUCCESS}]\n")
             return True
                 
         except Exception as e:
-            self.console.print(f"[{COLOR_ERROR}]✗ Fehler: {str(e)}[/{COLOR_ERROR}]\n")
-            if Confirm.ask("Nochmal versuchen?"):
+            self.console.print(f"[{COLOR_ERROR}]✗ Error: {str(e)}[/{COLOR_ERROR}]\n")
+            if Confirm.ask("Try again?"):
                 return await self.connect()
             return False
     
     def show_main_menu(self):
-        """Zeigt das Hauptmenü"""
+        """Shows the main menu"""
         self.console.clear()
-        show_header(self.console, f"Dracoon Pyclient v{__version__} - Hauptmenü")
+        show_header(self.console, f"Dracoon Pyclient v{__version__} - Main Menu")
         
         if self.god_mode:
-            self.console.print(f"[{COLOR_ERROR}]⚠️  GOD-MODE AKTIV ⚠️[/{COLOR_ERROR}]\n")
+            self.console.print(f"[{COLOR_ERROR}]⚠️  GOD-MODE ACTIVE ⚠️[/{COLOR_ERROR}]\n")
         
-        self.console.print(f"[bold {COLOR_PRIMARY}]Verfügbare Module:[/bold {COLOR_PRIMARY}]\n")
+        self.console.print(f"[bold {COLOR_PRIMARY}]Available Modules:[/bold {COLOR_PRIMARY}]\n")
         
         table = Table(show_header=True, header_style=f"bold {COLOR_PRIMARY}", box=TABLE_BOX)
         table.add_column("#", style=COLOR_DIM, width=4)
-        table.add_column("Modul", width=30)
-        table.add_column("Beschreibung", width=60)
+        table.add_column("Module", width=30)
+        table.add_column("Description", width=60)
         
         for module in self.modules:
             table.add_row(
@@ -115,11 +115,11 @@ class DracoonPyclient:
         
         self.console.print(table)
         
-        self.console.print(f"\n[bold {COLOR_PRIMARY}]Optionen:[/bold {COLOR_PRIMARY}]")
-        self.console.print(f"  [{COLOR_PRIMARY}]<Nummer>[/{COLOR_PRIMARY}] - Modul starten")
-        self.console.print(f"  [{COLOR_PRIMARY}]q[/{COLOR_PRIMARY}] - Beenden\n")
+        self.console.print(f"\n[bold {COLOR_PRIMARY}]Options:[/bold {COLOR_PRIMARY}]")
+        self.console.print(f"  [{COLOR_PRIMARY}]<Number>[/{COLOR_PRIMARY}] - Start module")
+        self.console.print(f"  [{COLOR_PRIMARY}]q[/{COLOR_PRIMARY}] - Quit\n")
         
-        choice = Prompt.ask("Auswahl")
+        choice = Prompt.ask("Selection")
         
         if choice.lower() == 'q':
             return None
@@ -131,39 +131,39 @@ class DracoonPyclient:
             if selected_module:
                 return selected_module
             else:
-                self.console.print(f"[{COLOR_ERROR}]Ungültiges Modul! Bitte Nummer zwischen 1 und {len(self.modules)} eingeben.[/{COLOR_ERROR}]\n")
+                self.console.print(f"[{COLOR_ERROR}]Invalid module! Please enter a number between 1 and {len(self.modules)}.[/{COLOR_ERROR}]\n")
                 pause(self.console)
                 return self.show_main_menu()
         except ValueError:
-            self.console.print(f"[{COLOR_ERROR}]Ungültige Eingabe! Bitte nur Zahlen eingeben.[/{COLOR_ERROR}]\n")
+            self.console.print(f"[{COLOR_ERROR}]Invalid input! Please enter numbers only.[/{COLOR_ERROR}]\n")
             pause(self.console)
             return self.show_main_menu()
     
     async def run_module(self, module):
-        """Startet das ausgewählte Modul"""
+        """Starts the selected module"""
         try:
             await module['module'].main(self.dracoon)
         except Exception as e:
-            self.console.print(f"\n[{COLOR_ERROR}]Fehler beim Ausführen des Moduls: {str(e)}[/{COLOR_ERROR}]\n")
+            self.console.print(f"\n[{COLOR_ERROR}]Error running module: {str(e)}[/{COLOR_ERROR}]\n")
             pause(self.console)
     
     async def run(self):
-        """Hauptschleife"""
+        """Main loop"""
         try:
-            # Startbildschirm
+            # Start screen
             self.console.clear()
-            self.console.print()  # Leerzeile
+            self.console.print()  # Empty line
             show_header(self.console, f"Dracoon Pyclient v{__version__}")
             
-            self.console.print(f"[bold {COLOR_PRIMARY}]Willkommen beim Dracoon Pyclient![/bold {COLOR_PRIMARY}]\n")
-            self.console.print(f"[{COLOR_DIM}]Modulares Support-Toolset[/{COLOR_DIM}]")
-            self.console.print(f"[{COLOR_DIM}]Nutzt offizielles Dracoon SDK[/{COLOR_DIM}]")
+            self.console.print(f"[bold {COLOR_PRIMARY}]Welcome to Dracoon Pyclient![/bold {COLOR_PRIMARY}]\n")
+            self.console.print(f"[{COLOR_DIM}]Modular Support Toolset[/{COLOR_DIM}]")
+            self.console.print(f"[{COLOR_DIM}]Using official Dracoon SDK[/{COLOR_DIM}]")
             
             if self.god_mode:
-                self.console.print(f"\n[{COLOR_ERROR}]⚠️  GOD-MODE ist aktiviert! ⚠️[/{COLOR_ERROR}]")
+                self.console.print(f"\n[{COLOR_ERROR}]⚠️  GOD-MODE is enabled! ⚠️[/{COLOR_ERROR}]")
             
             self.console.print()
-            pause(self.console, "Enter drücken um zu starten")
+            pause(self.console, "Press Enter to start")
             
             if not await self.connect():
                 return
@@ -179,23 +179,23 @@ class DracoonPyclient:
                 await self.run_module(selected_module)
             
             await self.dracoon.logout()
-            self.console.print(f"\n[{COLOR_PRIMARY}]Auf Wiedersehen![/{COLOR_PRIMARY}]\n")
+            self.console.print(f"\n[{COLOR_PRIMARY}]Goodbye![/{COLOR_PRIMARY}]\n")
             
         except KeyboardInterrupt:
-            self.console.print(f"\n\n[{COLOR_WARNING}]Abgebrochen durch Benutzer[/{COLOR_WARNING}]\n")
+            self.console.print(f"\n\n[{COLOR_WARNING}]Cancelled by user[/{COLOR_WARNING}]\n")
         except Exception as e:
-            self.console.print(f"\n[{COLOR_ERROR}]Fehler: {str(e)}[/{COLOR_ERROR}]\n")
+            self.console.print(f"\n[{COLOR_ERROR}]Error: {str(e)}[/{COLOR_ERROR}]\n")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description=f'Dracoon Pyclient v{__version__} - Modulares Support-Toolset',
+        description=f'Dracoon Pyclient v{__version__} - Modular Support Toolset',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
         '--god-mode',
         action='store_true',
-        help='Aktiviert God-Mode (löscht Räume ohne Nachfrage - GEFÄHRLICH!)'
+        help='Activates God-Mode (deletes rooms without confirmation - DANGEROUS!)'
     )
     parser.add_argument(
         '--version',

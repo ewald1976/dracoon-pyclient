@@ -1,11 +1,12 @@
 # Dracoon Pyclient
 
-Python-Tool für die Dracoon API mit Console-Interface.
+Python tool for the Dracoon API with console interface.
 
-## Module
+## Modules
 
-- **User zu Gruppe hinzufügen** - Massenoperation zum Hinzufügen von Usern zu Gruppen
-- **Room Admin Report** - Zeigt an wo ein User letzter Raum Admin ist. Raum kann dann direkt gelöscht werden.
+- **Add Users to Group** - Bulk operation to add users to groups
+- **Room Admin Report** - Shows where a user is the last room admin. Room can then be deleted directly.
+- **List Group Members** - Lists all members of a group and optionally exports as CSV
 
 ## Installation
 
@@ -22,27 +23,26 @@ source venv/bin/activate  # macOS/Linux
 pip3 install -r requirements.txt
 ```
 
-## Konfiguration
+## Configuration
 
-### OAuth-App in Dracoon erstellen
+### Create OAuth App in Dracoon
 
-1. Einstellungen → Sicherheit → OAuth Apps → "Neue OAuth-App erstellen"
+1. Settings → Security → OAuth Apps → "Create New App"
 2. Grant Type: `password`
 3. Redirect URI: `http://localhost`
-4. Client-ID und Client-Secret notieren
+4. Note down Client-ID and Client-Secret
 
-### .env Datei
+### .env File
 
 ```bash
 cp .env.example .env
-nano .env  # Credentials eintragen
+nano .env  # Enter credentials
 ```
 
-**Erforderliche Berechtigungen:**
-- Group Admin (für User-zu-Gruppe)
-- User Manager (für Room Admin Report)
+**Required Permissions:**
+- Admin permissions required
 
-## Verwendung
+## Usage
 
 ```bash
 python3 dracoon-pyclient.py
@@ -50,39 +50,39 @@ python3 dracoon-pyclient.py
 
 ### Windows
 
-Für Windows steht eine ausführbare Version zur Verfügung. Wenn ein .env File für die Konfiguraion verwendet wird, muss sich dieses im selben Verzeichnis befinden wie die EXE-Datei.
+An executable version is available for Windows. If a .env file is used for configuration, it must be in the same directory as the EXE file.
 
-## Häufige Fehler
+## Common Errors
 
-**401 Unauthorized** - Zugangsdaten in `.env` prüfen, OAuth Grant Type muss `password` sein
+**401 Unauthorized** - Check credentials in `.env`, OAuth Grant Type must be `password`
 
-**403 Forbidden** - Benutzer hat nicht die erforderlichen Berechtigungen
+**403 Forbidden** - User does not have the required permissions
 
-**ModuleNotFoundError** - `pip3 install -r requirements.txt` ausführen
+**ModuleNotFoundError** - Run `pip3 install -r requirements.txt`
 
 ## Disclaimer 
 
-Dieses Tool wurde privat entwickelt und hat **keinen offiziellen Bezug zur Firma Dracoon**. Die Nutzung erfolgt auf eigene Verantwortung. Der Entwickler übernimmt keine Haftung für eventuelle Schäden, die durch die Verwendung dieses Tools entstehen.
+This tool was developed privately and has **no official connection to Dracoon GmbH**. Use at your own risk. The developer assumes no liability for any damage caused by the use of this tool.
 
-## Lizenz
+## License
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) für Details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-### Verwendete Bibliotheken
+### Used Libraries
 
-Dieses Projekt nutzt das offizielle [DRACOON Python SDK](https://github.com/unbekanntes-pferd/dracoon-python-api), welches unter der Apache License 2.0 lizenziert ist.
+This project uses the official [DRACOON Python SDK](https://github.com/unbekanntes-pferd/dracoon-python-api), which is licensed under the Apache License 2.0.
 
 #### DRACOON Python SDK
 - **Repository:** https://github.com/unbekanntes-pferd/dracoon-python-api
-- **Lizenz:** Apache License 2.0
+- **License:** Apache License 2.0
 - **Copyright:** © DRACOON Contributors
 
-Weitere verwendete Bibliotheken:
+Other libraries used:
 - **Rich** - MIT License
 - **python-dotenv** - BSD-3-Clause License
 
-Eine vollständige Liste aller Abhängigkeiten findest du in `requirements.txt`.
+A complete list of all dependencies can be found in `requirements.txt`.
 
-## Autor
+## Author
 
 [@ewald1976](https://github.com/ewald1976)

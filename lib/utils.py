@@ -37,7 +37,7 @@ def show_header(console: Console, title: str) -> None:
 
 def get_credentials() -> tuple:
     """
-    Lädt Credentials aus .env oder fragt interaktiv nach
+    Loads credentials from .env or asks interactively
     Returns: (base_url, client_id, client_secret, username, password)
     """
     console = Console()
@@ -47,41 +47,41 @@ def get_credentials() -> tuple:
     if not base_url:
         base_url = Prompt.ask(f"[{COLOR_PRIMARY}]Dracoon URL[/{COLOR_PRIMARY}]")
     else:
-        console.print(f"[{COLOR_DIM}]Dracoon URL aus .env: {base_url}[/{COLOR_DIM}]")
+        console.print(f"[{COLOR_DIM}]Dracoon URL from .env: {base_url}[/{COLOR_DIM}]")
     
     client_id = os.getenv('DRACOON_CLIENT_ID')
     if not client_id:
         console.print(f"\n[{COLOR_PRIMARY}]OAuth-App Credentials:[/{COLOR_PRIMARY}]")
         client_id = Prompt.ask(f"[{COLOR_PRIMARY}]Client ID[/{COLOR_PRIMARY}]")
     else:
-        console.print(f"[{COLOR_DIM}]Client ID aus .env: {client_id[:8]}...[/{COLOR_DIM}]")
+        console.print(f"[{COLOR_DIM}]Client ID from .env: {client_id[:8]}...[/{COLOR_DIM}]")
     
     client_secret = os.getenv('DRACOON_CLIENT_SECRET')
     if not client_secret:
         client_secret = Prompt.ask(f"[{COLOR_PRIMARY}]Client Secret[/{COLOR_PRIMARY}]", password=True)
     else:
-        console.print(f"[{COLOR_DIM}]Client Secret aus .env: ********[/{COLOR_DIM}]")
+        console.print(f"[{COLOR_DIM}]Client Secret from .env: ********[/{COLOR_DIM}]")
     
     username = os.getenv('DRACOON_USERNAME')
     if not username:
-        console.print(f"\n[{COLOR_PRIMARY}]Dein Dracoon-Login:[/{COLOR_PRIMARY}]")
-        username = Prompt.ask(f"[{COLOR_PRIMARY}]Benutzername[/{COLOR_PRIMARY}]")
+        console.print(f"\n[{COLOR_PRIMARY}]Your Dracoon Login:[/{COLOR_PRIMARY}]")
+        username = Prompt.ask(f"[{COLOR_PRIMARY}]Username[/{COLOR_PRIMARY}]")
     else:
-        console.print(f"[{COLOR_DIM}]Benutzername aus .env: {username}[/{COLOR_DIM}]")
+        console.print(f"[{COLOR_DIM}]Username from .env: {username}[/{COLOR_DIM}]")
     
     password = os.getenv('DRACOON_PASSWORD')
     if not password:
-        password = Prompt.ask(f"[{COLOR_PRIMARY}]Passwort[/{COLOR_PRIMARY}]", password=True)
+        password = Prompt.ask(f"[{COLOR_PRIMARY}]Password[/{COLOR_PRIMARY}]", password=True)
     else:
-        console.print(f"[{COLOR_DIM}]Passwort aus .env: ********[/{COLOR_DIM}]")
+        console.print(f"[{COLOR_DIM}]Password from .env: ********[/{COLOR_DIM}]")
     
     return base_url, client_id, client_secret, username, password
 
 
-def search_and_select_user(console: Console, all_users: List[Dict], prompt_text: str = "Suche nach User") -> Optional[Dict]:
-    """Interaktive User-Suche und Auswahl"""
+def search_and_select_user(console: Console, all_users: List[Dict], prompt_text: str = "Search for user") -> Optional[Dict]:
+    """Interactive user search and selection"""
     console.print(f"\n[bold {COLOR_PRIMARY}]{prompt_text}[/bold {COLOR_PRIMARY}]")
-    search = Prompt.ask(f"[{COLOR_PRIMARY}]Name oder E-Mail (Enter für Liste)[/{COLOR_PRIMARY}]", default="")
+    search = Prompt.ask(f"[{COLOR_PRIMARY}]Name or email (Enter for list)[/{COLOR_PRIMARY}]", default="")
     
     if search:
         filtered_users = [
@@ -94,13 +94,13 @@ def search_and_select_user(console: Console, all_users: List[Dict], prompt_text:
         filtered_users = all_users
     
     if not filtered_users:
-        console.print(f"[{COLOR_ERROR}]Keine User gefunden![/{COLOR_ERROR}]")
+        console.print(f"[{COLOR_ERROR}]No users found![/{COLOR_ERROR}]")
         return None
     
     table = Table(show_header=True, header_style=f"bold {COLOR_PRIMARY}", box=TABLE_BOX)
     table.add_column("#", style=COLOR_DIM, width=6)
     table.add_column("Name", width=25)
-    table.add_column("E-Mail", width=35)
+    table.add_column("Email", width=35)
     table.add_column("Username", width=20)
     
     display_users = filtered_users[:20]
@@ -112,10 +112,10 @@ def search_and_select_user(console: Console, all_users: List[Dict], prompt_text:
     console.print(table)
     
     if len(filtered_users) > 20:
-        console.print(f"\n[{COLOR_WARNING}]Hinweis: {len(filtered_users) - 20} weitere Ergebnisse nicht angezeigt.[/{COLOR_WARNING}]")
+        console.print(f"\n[{COLOR_WARNING}]Note: {len(filtered_users) - 20} additional results not shown.[/{COLOR_WARNING}]")
     
     console.print()
-    choice = Prompt.ask(f"[{COLOR_PRIMARY}]Wähle User (Nummer) oder 's' für neue Suche[/{COLOR_PRIMARY}]", default="1")
+    choice = Prompt.ask(f"[{COLOR_PRIMARY}]Select user (number) or 's' for new search[/{COLOR_PRIMARY}]", default="1")
     
     if choice.lower() == 's':
         return search_and_select_user(console, all_users, prompt_text)
@@ -124,10 +124,10 @@ def search_and_select_user(console: Console, all_users: List[Dict], prompt_text:
         idx = int(choice) - 1
         if 0 <= idx < len(display_users):
             return display_users[idx]
-        console.print(f"[{COLOR_ERROR}]Ungültige Auswahl![/{COLOR_ERROR}]")
+        console.print(f"[{COLOR_ERROR}]Invalid selection![/{COLOR_ERROR}]")
         return None
     except ValueError:
-        console.print(f"[{COLOR_ERROR}]Ungültige Eingabe![/{COLOR_ERROR}]")
+        console.print(f"[{COLOR_ERROR}]Invalid input![/{COLOR_ERROR}]")
         return None
 
 
@@ -156,6 +156,6 @@ def export_to_csv(file_path: str, headers: list, rows: list) -> bool:
         return False
 
 
-def pause(console: Console, message: str = "Enter drücken um fortzufahren"):
-    """Pausiert und wartet auf Enter"""
+def pause(console: Console, message: str = "Press Enter to continue"):
+    """Pauses and waits for Enter"""
     Prompt.ask(f"\n[{COLOR_DIM}]{message}[/{COLOR_DIM}]")
