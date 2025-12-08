@@ -48,6 +48,10 @@ nano .env  # Credentials eintragen
 python3 dracoon-pyclient.py
 ```
 
+### Windows
+
+Für Windows steht eine ausführbare Version zur Verfügung. Wenn ein .env File für die Konfiguraion verwendet wird, muss sich dieses im selben Verzeichnis befinden wie die EXE-Datei.
+
 ## Häufige Fehler
 
 **401 Unauthorized** - Zugangsdaten in `.env` prüfen, OAuth Grant Type muss `password` sein
