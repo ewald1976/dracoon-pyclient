@@ -3,8 +3,11 @@ name: Build Windows EXE
 on:
   push:
     tags:
-      - 'v*'       # wenn ein Tag wie v0.1.0 gepusht wird
-  workflow_dispatch:  # manuelle Ausführung möglich
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # <– WICHTIG für action-gh-release
 
 jobs:
   build-windows:
