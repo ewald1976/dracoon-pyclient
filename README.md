@@ -66,7 +66,22 @@ Dieses Tool wurde privat entwickelt und hat **keinen offiziellen Bezug zur Firma
 
 ## Lizenz
 
-MIT License - siehe [LICENSE](LICENSE)
+Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) für Details.
+
+### Verwendete Bibliotheken
+
+Dieses Projekt nutzt das offizielle [DRACOON Python SDK](https://github.com/unbekanntes-pferd/dracoon-python-api), welches unter der Apache License 2.0 lizenziert ist.
+
+#### DRACOON Python SDK
+- **Repository:** https://github.com/unbekanntes-pferd/dracoon-python-api
+- **Lizenz:** Apache License 2.0
+- **Copyright:** © DRACOON Contributors
+
+Weitere verwendete Bibliotheken:
+- **Rich** - MIT License
+- **python-dotenv** - BSD-3-Clause License
+
+Eine vollständige Liste aller Abhängigkeiten findest du in `requirements.txt`.
 
 ## Autor
 
