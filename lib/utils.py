@@ -45,7 +45,7 @@ def get_credentials() -> tuple:
     
     base_url = os.getenv('DRACOON_BASE_URL')
     if not base_url:
-        base_url = Prompt.ask(f"[{COLOR_PRIMARY}]Dracoon URL[/{COLOR_PRIMARY}]", default="https://demo-hw.dracoon.com")
+        base_url = Prompt.ask(f"[{COLOR_PRIMARY}]Dracoon URL[/{COLOR_PRIMARY}]")
     else:
         console.print(f"[{COLOR_DIM}]Dracoon URL aus .env: {base_url}[/{COLOR_DIM}]")
     
