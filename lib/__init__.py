@@ -16,6 +16,8 @@ from .utils import (
     TABLE_BOX
 )
 
+from .provisioning import ProvisioningClient
+
 __all__ = [
     'show_header',
     'get_credentials',
@@ -28,4 +30,5 @@ __all__ = [
     'COLOR_WARNING',
     'COLOR_DIM',
     'TABLE_BOX',
+    'ProvisioningClient',
 ]

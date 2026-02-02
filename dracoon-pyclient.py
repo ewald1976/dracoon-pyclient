@@ -7,7 +7,7 @@ Nutzt offizielles dracoon SDK!
 https://github.com/unbekanntes-pferd/dracoon-python-api
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import sys
 import asyncio
@@ -23,7 +23,7 @@ from lib import (
     show_header, get_credentials, pause,
     COLOR_PRIMARY, COLOR_SUCCESS, COLOR_ERROR, COLOR_WARNING, COLOR_DIM, TABLE_BOX
 )
-from modules import user_to_group, room_admin_report, group_members_report
+from modules import user_to_group, room_admin_report, group_members_report, customer_email_export
 
 
 class DracoonPyclient:
@@ -38,23 +38,37 @@ class DracoonPyclient:
                 'id': 1,
                 'name': 'Add Users to Group',
                 'description': 'Add users to groups - individually, filtered or as bulk operation',
-                'module': user_to_group
+                'module': user_to_group,
+                'requires_connection': True
             },
             {
                 'id': 2,
                 'name': 'Room Admin Report',
                 'description': 'Shows (deletes) rooms where a user is the last admin',
-                'module': room_admin_report
+                'module': room_admin_report,
+                'requires_connection': True
             },
             {
                 'id': 3,
                 'name': 'List Group Members',
                 'description': 'Lists all members of a group and optionally exports as CSV',
-                'module': group_members_report
+                'module': group_members_report,
+                'requires_connection': True
+            },
+            {
+                'id': 4,
+                'name': 'Customer Email Export (Reseller)',
+                'description': 'Export all email addresses from all customers (Multi-Tenant)',
+                'module': customer_email_export,
+                'requires_connection': False  # Nutzt Provisioning API statt normalem SDK
             }
         ]
     
-    async def connect(self):
+    def has_oauth_modules_enabled(self):
+        """Prüft ob Module vorhanden sind die OAuth benötigen"""
+        return any(m.get('requires_connection', True) for m in self.modules)
+    
+    async def connect(self, skip_on_error=False):
         """Establishes connection to Dracoon API"""
         self.console.clear()
         show_header(self.console, f"Dracoon Pyclient v{__version__}")
@@ -67,6 +81,12 @@ class DracoonPyclient:
         
         # Credentials laden
         base_url, client_id, client_secret, username, password = get_credentials()
+        
+        # Wenn alle Felder leer sind, OAuth überspringen
+        if not any([client_id, client_secret, username, password]):
+            if skip_on_error:
+                self.console.print(f"[{COLOR_WARNING}]No OAuth credentials found. Skipping OAuth authentication.[/{COLOR_WARNING}]")
+                return False
         
         self.console.print(f"\n[{COLOR_WARNING}]Connecting to Dracoon...[/{COLOR_WARNING}]")
         
@@ -87,8 +107,12 @@ class DracoonPyclient:
                 
         except Exception as e:
             self.console.print(f"[{COLOR_ERROR}]✗ Error: {str(e)}[/{COLOR_ERROR}]\n")
+            
+            if skip_on_error:
+                return False
+            
             if Confirm.ask("Try again?"):
-                return await self.connect()
+                return await self.connect(skip_on_error)
             return False
     
     def show_main_menu(self):
@@ -99,17 +123,31 @@ class DracoonPyclient:
         if self.god_mode:
             self.console.print(f"[{COLOR_ERROR}]⚠️  GOD-MODE ACTIVE ⚠️[/{COLOR_ERROR}]\n")
         
-        self.console.print(f"[bold {COLOR_PRIMARY}]Available Modules:[/bold {COLOR_PRIMARY}]\n")
+        # Info über verfügbare Auth-Methoden
+        if self.dracoon:
+            self.console.print(f"[{COLOR_SUCCESS}]✓ OAuth connected[/{COLOR_SUCCESS}]")
+        else:
+            self.console.print(f"[{COLOR_WARNING}]⚠ OAuth not connected (Provisioning API only)[/{COLOR_WARNING}]")
         
+        self.console.print(f"\n[bold {COLOR_PRIMARY}]Available Modules:[/bold {COLOR_PRIMARY}]\n")
+        
+        # Tabelle ohne separate Nummer-Spalte - Nummer wird in Modulnamen integriert
         table = Table(show_header=True, header_style=f"bold {COLOR_PRIMARY}", box=TABLE_BOX)
-        table.add_column("#", style=COLOR_DIM, width=4)
-        table.add_column("Module", width=30)
-        table.add_column("Description", width=60)
+        table.add_column("Module", width=35)
+        table.add_column("Auth", width=14)
+        table.add_column("Description", width=50)
         
         for module in self.modules:
+            auth_type = "OAuth" if module.get('requires_connection', True) else "Service Token"
+            auth_color = COLOR_SUCCESS if (module.get('requires_connection', True) and self.dracoon) or \
+                         (not module.get('requires_connection', True)) else COLOR_DIM
+            
+            # Nummer direkt im Modulnamen anzeigen
+            module_display = f"[bold {COLOR_PRIMARY}]{module['id']}.[/bold {COLOR_PRIMARY}] {module['name']}"
+            
             table.add_row(
-                str(module['id']),
-                module['name'],
+                module_display,
+                f"[{auth_color}]{auth_type}[/{auth_color}]",
                 module['description']
             )
         
@@ -142,9 +180,22 @@ class DracoonPyclient:
     async def run_module(self, module):
         """Starts the selected module"""
         try:
-            await module['module'].main(self.dracoon)
+            # Prüfen ob Modul OAuth benötigt aber keine Verbindung besteht
+            if module.get('requires_connection', True) and self.dracoon is None:
+                self.console.print(f"\n[{COLOR_ERROR}]✗ This module requires OAuth authentication![/{COLOR_ERROR}]")
+                self.console.print(f"[{COLOR_WARNING}]Please configure OAuth credentials in .env[/{COLOR_WARNING}]\n")
+                pause(self.console)
+                return
+            
+            # Manche Module benötigen keine DRACOON-Connection (z.B. Provisioning API)
+            if module.get('requires_connection', True):
+                await module['module'].main(self.dracoon)
+            else:
+                await module['module'].main()
         except Exception as e:
             self.console.print(f"\n[{COLOR_ERROR}]Error running module: {str(e)}[/{COLOR_ERROR}]\n")
+            import traceback
+            traceback.print_exc()
             pause(self.console)
     
     async def run(self):
@@ -165,8 +216,12 @@ class DracoonPyclient:
             self.console.print()
             pause(self.console, "Press Enter to start")
             
-            if not await self.connect():
-                return
+            # OAuth-Verbindung versuchen, aber nicht zwingend erforderlich
+            oauth_connected = await self.connect(skip_on_error=True)
+            
+            if not oauth_connected:
+                self.console.print(f"\n[{COLOR_WARNING}]OAuth not configured or connection failed.[/{COLOR_WARNING}]")
+                self.console.print(f"[{COLOR_DIM}]Only Provisioning API modules (Service Token) will be available.[/{COLOR_DIM}]\n")
             
             pause(self.console)
             
@@ -178,7 +233,9 @@ class DracoonPyclient:
                 
                 await self.run_module(selected_module)
             
-            await self.dracoon.logout()
+            if self.dracoon:
+                await self.dracoon.logout()
+            
             self.console.print(f"\n[{COLOR_PRIMARY}]Goodbye![/{COLOR_PRIMARY}]\n")
             
         except KeyboardInterrupt:

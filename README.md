@@ -7,6 +7,7 @@ Python tool for the Dracoon API with console interface.
 - **Add Users to Group** - Bulk operation to add users to groups
 - **Room Admin Report** - Shows where a user is the last room admin. Room can then be deleted directly.
 - **List Group Members** - Lists all members of a group and optionally exports as CSV
+- **Customer Email Export (Reseller)** - Export all email addresses from all customers in a multi-tenant environment
 
 ## Installation
 
@@ -25,12 +26,23 @@ pip3 install -r requirements.txt
 
 ## Configuration
 
-### Create OAuth App in Dracoon
+### Standard Modules (OAuth)
+
+For modules 1-3, create an OAuth App in Dracoon:
 
 1. Settings → Security → OAuth Apps → "Create New App"
 2. Grant Type: `password`
 3. Redirect URI: `http://localhost`
 4. Note down Client-ID and Client-Secret
+
+### Reseller Module (Provisioning API)
+
+For the "Customer Email Export" module, you need a **X-SDS-Service-Token**:
+
+1. Log in as Reseller/Tenant Administrator
+2. Settings → Provisioning
+3. Generate Service Token
+4. Note down the token
 
 ### .env File
 
@@ -39,8 +51,23 @@ cp .env.example .env
 nano .env  # Enter credentials
 ```
 
+**Required entries for standard modules:**
+```
+DRACOON_BASE_URL=https://your-instance.dracoon.com
+DRACOON_CLIENT_ID=your_client_id
+DRACOON_CLIENT_SECRET=your_client_secret
+DRACOON_USERNAME=your_username
+DRACOON_PASSWORD=your_password
+```
+
+**Additional entry for Reseller module:**
+```
+DRACOON_SERVICE_TOKEN=your_service_token
+```
+
 **Required Permissions:**
-- Admin permissions required
+- Modules 1-3: Admin permissions required
+- Module 4: Reseller/Tenant Administrator with Provisioning access
 
 ## Usage
 
@@ -52,6 +79,22 @@ python3 dracoon-pyclient.py
 
 An executable version is available for Windows. If a .env file is used for configuration, it must be in the same directory as the EXE file.
 
+## Multi-Tenant / Reseller Features
+
+The **Customer Email Export** module is specifically designed for Reseller/Multi-Tenant environments:
+
+- Uses the Provisioning API with Service Token authentication
+- Iterates over all customers in the tenant
+- Collects email addresses from all users across all customers
+- Exports results to CSV
+- No OAuth credentials needed for this module
+
+This is particularly useful for:
+- Mass communications to all users
+- User audits across multiple customers
+- Compliance reporting
+- Data migration planning
+
 ## Common Errors
 
 **401 Unauthorized** - Check credentials in `.env`, OAuth Grant Type must be `password`
@@ -59,6 +102,8 @@ An executable version is available for Windows. If a .env file is used for confi
 **403 Forbidden** - User does not have the required permissions
 
 **ModuleNotFoundError** - Run `pip3 install -r requirements.txt`
+
+**Provisioning API Error** - Verify Service Token is valid and user has Provisioning access
 
 ## Disclaimer 
 
@@ -80,6 +125,7 @@ This project uses the official [DRACOON Python SDK](https://github.com/unbekannt
 Other libraries used:
 - **Rich** - MIT License
 - **python-dotenv** - BSD-3-Clause License
+- **httpx** - BSD-3-Clause License
 
 A complete list of all dependencies can be found in `requirements.txt`.
 
