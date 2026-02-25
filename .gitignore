@@ -5,6 +5,8 @@
 # ==========================================
 # SECURITY - NIEMALS COMMITTEN!
 # ==========================================
+.claude/
+.claude
 .env
 .env.*
 !.env.example

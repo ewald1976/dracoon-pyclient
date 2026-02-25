@@ -211,20 +211,36 @@ class CustomerEmailExport:
                 for idx, customer in enumerate(customers, 1):
                     customer_id = customer.get('id')
                     customer_name = customer.get('companyName', 'Unknown')
-                    
+
                     # Kunden-Namen kürzen für bessere Anzeige
                     display_name = customer_name[:40] + "..." if len(customer_name) > 40 else customer_name
-                    
+
                     # Detail-Task aktualisieren
                     progress.update(
                         detail_task,
                         description=f"[{COLOR_WARNING}]Processing ({idx}/{total_customers}): {display_name}"
                     )
-                    
+
+                    # Neue Kunden-Felder extrahieren
+                    contract_type = customer.get('customerContractType', '')
+                    user_max = customer.get('userMax', 0)
+                    quota_max_bytes = customer.get('quotaMax', 0)
+                    quota_gb = round(quota_max_bytes / (1024 ** 3), 1) if quota_max_bytes else 0
+                    created_at_raw = customer.get('createdAt', '')
+                    if created_at_raw:
+                        try:
+                            from datetime import timezone
+                            dt = datetime.fromisoformat(created_at_raw.replace('Z', '+00:00'))
+                            created_at = dt.strftime('%d.%m.%Y')
+                        except Exception:
+                            created_at = created_at_raw
+                    else:
+                        created_at = ''
+
                     try:
                         # Alle User des Kunden laden
                         users = await self.prov_client.get_all_customer_users(customer_id)
-                        
+
                         user_count = 0
                         # E-Mails extrahieren
                         for user in users:
@@ -233,12 +249,22 @@ class CustomerEmailExport:
                                 self.all_emails.append({
                                     'customer_id': customer_id,
                                     'customer_name': customer_name,
+                                    'contract_type': contract_type,
+                                    'user_max': user_max,
+                                    'quota_gb': quota_gb,
+                                    'created_at': created_at,
                                     'user_id': user.get('id'),
                                     'first_name': user.get('firstName', ''),
                                     'last_name': user.get('lastName', ''),
                                     'email': email,
                                     'username': user.get('userName', ''),
-                                    'is_locked': user.get('isLocked', False)
+                                    'is_locked': user.get('isLocked', False),
+                                    'is_admin': user.get('isAdmin', False),
+                                    'is_config_manager': user.get('isConfigManager', False),
+                                    'is_user_manager': user.get('isUserManager', False),
+                                    'is_group_manager': user.get('isGroupManager', False),
+                                    'is_room_manager': user.get('isRoomManager', False),
+                                    'is_audit_log': user.get('isAuditLog', False),
                                 })
                                 user_count += 1
                         
@@ -294,19 +320,28 @@ class CustomerEmailExport:
         self.console.print(f"\n[bold {COLOR_PRIMARY}]Preview (first 10 entries):[/bold {COLOR_PRIMARY}]\n")
         
         table = Table(show_header=True, header_style=f"bold {COLOR_PRIMARY}", box=TABLE_BOX)
-        table.add_column("Customer", width=20)
-        table.add_column("Name", width=25)
-        table.add_column("Email", width=35)
+        table.add_column("Customer", width=18)
+        table.add_column("Type", width=10)
+        table.add_column("Max", justify="right", width=5)
+        table.add_column("GB", justify="right", width=6)
+        table.add_column("Since", width=11)
+        table.add_column("Name", width=22)
+        table.add_column("Email", width=30)
         table.add_column("Status", width=10)
-        
+
         for email_data in self.all_emails[:10]:
             name = f"{email_data['first_name']} {email_data['last_name']}".strip()
-            status = "🔒 Locked" if email_data.get('is_locked') else "✓ Active"
+            status = "Locked" if email_data.get('is_locked') else "Active"
             status_color = COLOR_ERROR if email_data.get('is_locked') else COLOR_SUCCESS
-            
+            cust_name = email_data['customer_name']
+
             table.add_row(
-                email_data['customer_name'][:18] + "..." if len(email_data['customer_name']) > 18 else email_data['customer_name'],
-                name[:23] + "..." if len(name) > 23 else name,
+                cust_name[:16] + ".." if len(cust_name) > 16 else cust_name,
+                email_data.get('contract_type', '')[:10],
+                str(email_data.get('user_max', '')),
+                str(email_data.get('quota_gb', '')),
+                email_data.get('created_at', ''),
+                name[:20] + ".." if len(name) > 20 else name,
                 email_data['email'],
                 f"[{status_color}]{status}[/{status_color}]"
             )
@@ -339,25 +374,45 @@ class CustomerEmailExport:
         headers = [
             'Customer ID',
             'Customer Name',
+            'Contract Type',
+            'User Max',
+            'Quota GB',
+            'Created At',
             'User ID',
             'First Name',
             'Last Name',
             'Email',
             'Username',
-            'Is Locked'
+            'Is Locked',
+            'Is Tenant Admin',
+            'Is Config Manager',
+            'Is User Manager',
+            'Is Group Manager',
+            'Is Room Manager',
+            'Is Audit Log',
         ]
-        
+
         # CSV Rows
         rows = [
             [
                 email['customer_id'],
                 email['customer_name'],
+                email.get('contract_type', ''),
+                email.get('user_max', ''),
+                email.get('quota_gb', ''),
+                email.get('created_at', ''),
                 email['user_id'],
                 email['first_name'],
                 email['last_name'],
                 email['email'],
                 email['username'],
-                'Yes' if email.get('is_locked') else 'No'
+                'Yes' if email.get('is_locked') else 'No',
+                'Yes' if email.get('is_admin') else 'No',
+                'Yes' if email.get('is_config_manager') else 'No',
+                'Yes' if email.get('is_user_manager') else 'No',
+                'Yes' if email.get('is_group_manager') else 'No',
+                'Yes' if email.get('is_room_manager') else 'No',
+                'Yes' if email.get('is_audit_log') else 'No',
             ]
             for email in self.all_emails
         ]
