@@ -7,7 +7,7 @@ Nutzt offizielles dracoon SDK!
 https://github.com/unbekanntes-pferd/dracoon-python-api
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.1"
 
 import sys
 import asyncio
